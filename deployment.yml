@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql-deploy
+spec:
+  selector:
+    matchLabels:
+      env: prod
+  replicas: 5
+  minReadySeconds: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 2
+      maxSurge: 2
+  template:
+    metadata:
+      labels:
+        env: prod
+    spec:
+      containers:
+      - name: mysql-pod
+        image: mysql:5.7
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: somewordpress
+        - name: MYSQL_DATABASE
+          value: wordpress
+        - name: MYSQL_USER
+          value: wordpress
+        - name: MYSQL_PASSWORD
+          value: wordpress
+        ports:
+        - containerPort: 3306
+---
+# declare a service object
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-svc
+  labels:
+    env: prod
+# define and configure service to acces 80 port
+spec:
+  type: NodePort
+  ports:
+  - port: 3306
+    nodePort: 32400
+    protocol: TCP
+  selector:
+    env: prod
+
+
